@@ -1,0 +1,14 @@
+C:\Users\Romain\Desktop\Tetris\TetrisGame\bin\Debug\net8.0-windows\TetrisGame.exe
+C:\Users\Romain\Desktop\Tetris\TetrisGame\bin\Debug\net8.0-windows\TetrisGame.deps.json
+C:\Users\Romain\Desktop\Tetris\TetrisGame\bin\Debug\net8.0-windows\TetrisGame.runtimeconfig.json
+C:\Users\Romain\Desktop\Tetris\TetrisGame\bin\Debug\net8.0-windows\TetrisGame.dll
+C:\Users\Romain\Desktop\Tetris\TetrisGame\bin\Debug\net8.0-windows\TetrisGame.pdb
+C:\Users\Romain\Desktop\Tetris\TetrisGame\obj\Debug\net8.0-windows\TetrisGame.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Romain\Desktop\Tetris\TetrisGame\obj\Debug\net8.0-windows\TetrisGame.AssemblyInfoInputs.cache
+C:\Users\Romain\Desktop\Tetris\TetrisGame\obj\Debug\net8.0-windows\TetrisGame.AssemblyInfo.cs
+C:\Users\Romain\Desktop\Tetris\TetrisGame\obj\Debug\net8.0-windows\TetrisGame.csproj.CoreCompileInputs.cache
+C:\Users\Romain\Desktop\Tetris\TetrisGame\obj\Debug\net8.0-windows\TetrisGame.dll
+C:\Users\Romain\Desktop\Tetris\TetrisGame\obj\Debug\net8.0-windows\refint\TetrisGame.dll
+C:\Users\Romain\Desktop\Tetris\TetrisGame\obj\Debug\net8.0-windows\TetrisGame.pdb
+C:\Users\Romain\Desktop\Tetris\TetrisGame\obj\Debug\net8.0-windows\TetrisGame.genruntimeconfig.cache
+C:\Users\Romain\Desktop\Tetris\TetrisGame\obj\Debug\net8.0-windows\ref\TetrisGame.dll
