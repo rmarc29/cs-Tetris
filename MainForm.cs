@@ -9,32 +9,88 @@ namespace TetrisGameWinForms
         private System.Windows.Forms.Timer gameTimer;
         private int gridWidth = 10, gridHeight = 20, cellSize = 30;
         private char[,] grid;
-        private int blockX = 4, blockY = 0;
-        private char[,] block = {
-            { 'O', 'O' },
-            { 'O', 'O' }
-        };
+        private Brush[,] gridColors;
+        private int blockX, blockY;
+        private char[,] block;
+        private Brush blockColor;
         private int score = 0;
+        private readonly Random random = new Random();
+
+        private readonly char[][,] tetrominoes = new char[][,]
+        {
+            new char[,]
+            {
+                { '.', '.', '.', '.' },
+                { 'O', 'O', 'O', 'O' },
+                { '.', '.', '.', '.' },
+                { '.', '.', '.', '.' }
+            },
+            new char[,]
+            {
+                { 'O', 'O' },
+                { 'O', 'O' }
+            },
+            new char[,]
+            {
+                { '.', 'O', '.' },
+                { 'O', 'O', 'O' },
+                { '.', '.', '.' }
+            },
+            new char[,]
+            {
+                { '.', '.', 'O' },
+                { 'O', 'O', 'O' },
+                { '.', '.', '.' }
+            },
+            new char[,]
+            {
+                { 'O', '.', '.' },
+                { 'O', 'O', 'O' },
+                { '.', '.', '.' }
+            },
+            new char[,]
+            {
+                { '.', 'O', 'O' },
+                { 'O', 'O', '.' },
+                { '.', '.', '.' }
+            },
+            new char[,]
+            {
+                { 'O', 'O', '.' },
+                { '.', 'O', 'O' },
+                { '.', '.', '.' }
+            }
+        };
+
+        private readonly Brush[] blockColors = new Brush[]
+        {
+            Brushes.Cyan,
+            Brushes.Yellow,
+            Brushes.Purple,
+            Brushes.Orange,
+            Brushes.Blue,
+            Brushes.Green,
+            Brushes.Red
+        };
 
         public MainForm()
         {
-            // Set up the form
             this.Text = "Tetris Game";
-            this.ClientSize = new Size(gridWidth * cellSize, gridHeight * cellSize + 50); // Extra space for score
+            this.ClientSize = new Size(gridWidth * cellSize, gridHeight * cellSize + 50);
             this.DoubleBuffered = true;
 
-            // Initialize grid
             grid = new char[gridHeight, gridWidth];
+            gridColors = new Brush[gridHeight, gridWidth];
             InitializeGrid();
 
-            // Set up timer
             gameTimer = new System.Windows.Forms.Timer();
-            gameTimer.Interval = 500; // 500ms
+            gameTimer.Interval = 500;
             gameTimer.Tick += GameLoop;
             gameTimer.Start();
 
-            // Paint event
             this.Paint += DrawGrid;
+
+            SpawnNewBlock();
         }
 
         private void InitializeGrid()
@@ -44,6 +100,7 @@ namespace TetrisGameWinForms
                 for (int x = 0; x < gridWidth; x++)
                 {
                     grid[y, x] = '.';
+                    gridColors[y, x] = Brushes.White;
                 }
             }
         }
@@ -51,79 +108,103 @@ namespace TetrisGameWinForms
         private void GameLoop(object sender, EventArgs e)
         {
             MoveBlockDown();
-            this.Invalidate(); // Redraw the form
+            this.Invalidate();
+        }
+
+        private void SpawnNewBlock()
+        {
+            int index = random.Next(tetrominoes.Length);
+            block = tetrominoes[index];
+            blockColor = blockColors[index];
+            blockX = gridWidth / 2 - block.GetLength(1) / 2;
+            blockY = 0;
+
+            if (!CanMove(blockX, blockY))
+            {
+                gameTimer.Stop();
+                MessageBox.Show("Game Over! Final Score: " + score, "Tetris");
+                Application.Exit();
+            }
         }
 
         private void MoveBlockDown()
         {
-            ClearBlock();
+            ClearBlockFromGrid();
             if (CanMove(blockX, blockY + 1))
             {
                 blockY++;
             }
             else
             {
-                PlaceBlock();
-                LockBlock();
+                PlaceBlockOnGrid();
                 CheckForLines();
                 SpawnNewBlock();
             }
-            PlaceBlock();
+            PlaceBlockOnGrid();
         }
 
         private bool CanMove(int newX, int newY)
         {
-            for (int y = 0; y < block.GetLength(0); y++)
+            return IsValidPosition(block, newX, newY);
+        }
+
+        private bool IsValidPosition(char[,] testBlock, int newX, int newY)
+        {
+            for (int y = 0; y < testBlock.GetLength(0); y++)
             {
-                for (int x = 0; x < block.GetLength(1); x++)
+                for (int x = 0; x < testBlock.GetLength(1); x++)
                 {
-                    if (block[y, x] == 'O')
+                    if (testBlock[y, x] == 'O')
                     {
                         int targetX = newX + x;
                         int targetY = newY + y;
 
-                        if (targetX < 0 || targetX >= gridWidth || targetY >= gridHeight ||
-                            (targetY >= 0 && grid[targetY, targetX] != '.'))
+                        // Check for boundaries
+                        if (targetX < 0 || targetX >= gridWidth || targetY >= gridHeight)
+                        {
+                            return false;
+                        }
+
+                        // Check for collisions with existing blocks
+                        if (targetY >= 0 && grid[targetY, targetX] != '.')
                         {
                             return false;
                         }
                     }
                 }
             }
+
             return true;
         }
 
-        private void ClearBlock()
+        private void ClearBlockFromGrid()
         {
             for (int y = 0; y < block.GetLength(0); y++)
             {
                 for (int x = 0; x < block.GetLength(1); x++)
                 {
-                    if (block[y, x] == 'O' && blockY + y < gridHeight && blockX + x < gridWidth)
+                    if (block[y, x] == 'O' && blockY + y >= 0 && blockY + y < gridHeight && blockX + x < gridWidth)
                     {
                         grid[blockY + y, blockX + x] = '.';
+                        gridColors[blockY + y, blockX + x] = Brushes.White;
                     }
                 }
             }
         }
 
-        private void PlaceBlock()
+        private void PlaceBlockOnGrid()
         {
             for (int y = 0; y < block.GetLength(0); y++)
             {
                 for (int x = 0; x < block.GetLength(1); x++)
                 {
-                    if (block[y, x] == 'O' && blockY + y < gridHeight && blockX + x < gridWidth)
+                    if (block[y, x] == 'O' && blockY + y >= 0 && blockY + y < gridHeight && blockX + x < gridWidth)
                     {
                         grid[blockY + y, blockX + x] = block[y, x];
+                        gridColors[blockY + y, blockX + x] = blockColor;
                     }
                 }
             }
-        }
-
-        private void LockBlock()
-        {
-            PlaceBlock();
         }
 
         private void CheckForLines()
@@ -144,7 +225,7 @@ namespace TetrisGameWinForms
                 {
                     ClearLine(y);
                     ShiftLinesDown(y);
-                    score += 100; // Increment score for each cleared line
+                    score += 100;
                 }
             }
         }
@@ -154,6 +235,7 @@ namespace TetrisGameWinForms
             for (int x = 0; x < gridWidth; x++)
             {
                 grid[y, x] = '.';
+                gridColors[y, x] = Brushes.White;
             }
         }
 
@@ -164,29 +246,14 @@ namespace TetrisGameWinForms
                 for (int x = 0; x < gridWidth; x++)
                 {
                     grid[y, x] = grid[y - 1, x];
+                    gridColors[y, x] = gridColors[y - 1, x];
                 }
             }
 
             for (int x = 0; x < gridWidth; x++)
             {
                 grid[0, x] = '.';
-            }
-        }
-
-        private void SpawnNewBlock()
-        {
-            blockX = 4;
-            blockY = 0;
-            block = new char[,] {
-                { 'O', 'O' },
-                { 'O', 'O' }
-            };
-
-            if (!CanMove(blockX, blockY))
-            {
-                gameTimer.Stop();
-                MessageBox.Show("Game Over! Final Score: " + score, "Tetris");
-                Application.Exit();
+                gridColors[0, x] = Brushes.White;
             }
         }
 
@@ -203,7 +270,7 @@ namespace TetrisGameWinForms
                 }
             }
 
-            if (CanMove(blockX, blockY)) // Ensure the rotation is valid
+            if (IsValidPosition(rotatedBlock, blockX, blockY))
             {
                 block = rotatedBlock;
             }
@@ -211,7 +278,7 @@ namespace TetrisGameWinForms
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            ClearBlock();
+            ClearBlockFromGrid();
             if (keyData == Keys.Left && CanMove(blockX - 1, blockY))
             {
                 blockX--;
@@ -228,7 +295,7 @@ namespace TetrisGameWinForms
             {
                 RotateBlock();
             }
-            PlaceBlock();
+            PlaceBlockOnGrid();
             this.Invalidate();
             return base.ProcessCmdKey(ref msg, keyData);
         }
@@ -237,18 +304,16 @@ namespace TetrisGameWinForms
         {
             Graphics g = e.Graphics;
 
-            // Draw the grid
             for (int y = 0; y < gridHeight; y++)
             {
                 for (int x = 0; x < gridWidth; x++)
                 {
                     Rectangle cell = new Rectangle(x * cellSize, y * cellSize, cellSize, cellSize);
-                    g.FillRectangle(grid[y, x] == '.' ? Brushes.White : Brushes.Blue, cell);
+                    g.FillRectangle(gridColors[y, x], cell);
                     g.DrawRectangle(Pens.Black, cell);
                 }
             }
 
-            // Draw the score
             g.DrawString($"Score: {score}", new Font("Arial", 16), Brushes.Black, 5, gridHeight * cellSize + 5);
         }
     }
